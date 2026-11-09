@@ -71,6 +71,13 @@
         "iosBanner": "",
         "androidInterstitial": "ca-app-pub-2222587566046092/8030413030",
         "iosInterstitial": ""
+      },
+      "expo-navigation-bar": {
+        "enforceContrast": false,
+        "style": "dark"
+      },
+      "eas": {
+        "projectId": "b2560632-3a0d-4680-a200-531bfb06bf11"
       }
     },
     "runtimeVersion": {

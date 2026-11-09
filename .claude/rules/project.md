@@ -29,7 +29,7 @@
 - `extra.apiUrl`: 배포된 Worker 주소 (https://trendr.edik-choi.workers.dev)
 - 애드몹: Android 앱(Trendr, `~8605128106`)·배너·전면 광고 단위 등록 완료. iOS는 아직 샘플 ID(출시할 때 애드몹에 iOS 앱 추가). production 채널이 아니면 테스트 광고
 - `npx eas-cli@latest init`으로 `extra.eas.projectId`·`updates.url` 채우기. 없으면 푸시 토큰 발급 안 됨
-- Android 푸시: Firebase 프로젝트 `trendr-99ede`에 com.trendr.app 등록, `app/google-services.json` 반영. 남은 일: Firebase 서비스 계정 키(FCM v1)를 EAS 자격증명에 등록
+- Android 푸시: Firebase 프로젝트 `trendr-99ede`에 com.trendr.app 등록, `app/google-services.json` 반영. FCM v1 서비스 계정 키 EAS 등록 완료
 
 ## 결정사항
 - 첫 버전: 목록 + 하루 3번 요약 푸시. 관심 키워드 알림은 다음 단계(유료 기능 후보).
