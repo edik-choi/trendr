@@ -16,19 +16,19 @@ type Props = {
 
 export default function TrendsScreen({ geo, onGeo, refreshKey, header }: Props) {
   const [data, setData] = useState<TrendList | null>(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null); // 원인 파악용 짧은 메시지
   const [refreshing, setRefreshing] = useState(false);
   const withAd = useInterstitialBefore();
 
   const load = useCallback(async () => {
-    setError(false);
+    setError(null);
     try {
       const d = await getTrends(geo ?? undefined);
-      if (!d) throw new Error();
+      if (!d) throw new Error("404");
       setData(d);
       if (d.geo !== geo) onGeo(d.geo, d.home);
-    } catch {
-      setError(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
     }
   }, [geo, onGeo]);
   useEffect(() => { load(); }, [load, refreshKey]);
@@ -46,6 +46,7 @@ export default function TrendsScreen({ geo, onGeo, refreshKey, header }: Props) 
     return (
       <View style={s.center}>
         <Text style={[s.body, { textAlign: "center" }]}>{t.error}</Text>
+        <Text style={[s.sub, { textAlign: "center", marginTop: 4 }]}>{error}</Text>
         <Button title={t.retry} kind="outline" onPress={load} />
       </View>
     );

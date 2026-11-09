@@ -16,10 +16,12 @@ const sha256 = async (s: string) =>
 
 // 구글 트렌드 "지금 뜨는 검색어" RSS. 구글 쪽 갱신 주기에 맞춰 엣지에 10분 캐시
 async function fetchTrends(geo: string): Promise<Trend[]> {
+  // 구글이 느리면 앱 쪽 타임아웃(15초)보다 먼저 끊고 오류를 남김
   const res = await fetch(`https://trends.google.com/trending/rss?geo=${geo}`, {
     cf: { cacheTtl: 600, cacheEverything: true },
+    signal: AbortSignal.timeout(8000),
   } as RequestInit);
-  if (!res.ok) throw new Error(`trends ${geo} ${res.status}`);
+  if (!res.ok) throw new Error(`trends ${geo} ${res.status} ${(await res.text()).slice(0, 200)}`);
   return rankTrends(parseTrends(await res.text()));
 }
 
@@ -37,8 +39,9 @@ app.get("/api/trends", async (c) => {
   try {
     return c.json({ home, geo, geos: GEOS, trends: await fetchTrends(geo) }, 200, { "cache-control": "public, max-age=300" });
   } catch (e) {
-    console.error(e);
-    return c.json({ error: "unavailable" }, 502);
+    const colo = (c.req.raw as { cf?: { colo?: string } }).cf?.colo;
+    console.error(`api/trends failed geo=${geo} colo=${colo}`, e instanceof Error ? e.message : e);
+    return c.json({ error: "unavailable", detail: e instanceof Error ? e.message.slice(0, 120) : null }, 502);
   }
 });
 

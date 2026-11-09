@@ -3,6 +3,7 @@
   "name": "trendr",
   "main": "src/index.ts",
   "compatibility_date": "2026-11-01",
+  "observability": { "enabled": true },
   "d1_databases": [
     { "binding": "DB", "database_name": "trendr", "database_id": "4c5635e7-7c1f-4a66-8d89-a1a76411c024" }
   ],

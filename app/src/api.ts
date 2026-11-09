@@ -31,13 +31,13 @@ async function call<T>(method: string, path: string, body?: unknown): Promise<T 
       body: body === undefined ? undefined : JSON.stringify(body),
       signal: ctrl.signal,
     });
-  } catch {
-    throw new Error(`No response (${API_URL})`);
+  } catch (e) {
+    throw new Error(`No response (${API_URL}${path}) ${e instanceof Error ? e.message : ""}`);
   } finally {
     clearTimeout(timer);
   }
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Server error (${res.status})`);
+  if (!res.ok) throw new Error(`Server error (${res.status}) ${(await res.text().catch(() => "")).slice(0, 120)}`);
   return (await res.json()) as T;
 }
 
