@@ -1,4 +1,4 @@
-# Trending Now (가칭)
+# Trendr
 
 애드몹 수익형 글로벌 모바일 앱. 나라별 구글 "지금 뜨는 검색어"와 관련 뉴스를 보여주고, 하루 3번(현지 8·12·19시) 상위 3개를 요약 푸시. 푸시 → 앱 접속 → 광고 노출이 수익 구조. 구조는 청약시그널(edik-choi/subscription)과 같음.
 
@@ -24,8 +24,8 @@
 청약시그널과 같음: `git push -f origin main:build-preview`(테스트 APK), `main:build-production`(스토어). JS만 바뀌면 `npm run update:production`. 네이티브가 바뀌면 `version` 올리고 새 빌드.
 
 ## 출시 전 할 일 (app/app.json)
-- `name`(지금 "Trending Now" 가칭), 아이콘·스플래시(`app/assets`는 청약시그널 것을 임시로 복사)
-- 패키지명 `com.aikunst.trends` (스토어 출시 후 변경 불가)
+- 앱 이름 `Trendr`(스토어 등록명은 "Trendr: Trending Searches Now" 식으로 부제 포함). 아이콘·스플래시(`app/assets`는 청약시그널 것을 임시로 복사)
+- 패키지명 `com.trendr.app` (스토어 출시 후 변경 불가)
 - `extra.apiUrl`: 배포된 Worker 주소 (지금 https://trends.edik-choi.workers.dev 가정)
 - 애드몹 앱 ID(`plugins`의 androidAppId/iosAppId, 지금 Google 샘플)와 `extra.admob` 광고 단위 ID. 비어 있으면 테스트 광고
 - `npx eas-cli@latest init`으로 `extra.eas.projectId`·`updates.url` 채우기. 없으면 푸시 토큰 발급 안 됨
