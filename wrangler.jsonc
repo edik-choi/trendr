@@ -1,10 +1,10 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "trends",
+  "name": "trendr",
   "main": "src/index.ts",
   "compatibility_date": "2026-11-01",
   "d1_databases": [
-    { "binding": "DB", "database_name": "trends", "database_id": "06617cb3-44b0-4de4-a3a0-ad7f63177db8" }
+    { "binding": "DB", "database_name": "trendr", "database_id": "4c5635e7-7c1f-4a66-8d89-a1a76411c024" }
   ],
   // 매시 정각: 기기 시간대로 지금이 알림 시각(src/digest.ts PUSH_HOURS)인 기기에 요약 푸시
   "triggers": { "crons": ["0 * * * *"] }

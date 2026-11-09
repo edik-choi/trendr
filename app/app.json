@@ -64,7 +64,7 @@
     ],
     "scheme": "trendr",
     "extra": {
-      "apiUrl": "https://trends.edik-choi.workers.dev",
+      "apiUrl": "https://trendr.edik-choi.workers.dev",
       "admob": {
         "androidBanner": "",
         "iosBanner": "",

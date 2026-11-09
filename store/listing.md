@@ -1,7 +1,7 @@
 # 스토어 등록 문구 (초안)
 
 이미지: `store/icon-512.png`(구글 플레이 아이콘), `store/feature-graphic.png`(그래픽 이미지 1024×500). 스크린샷은 테스트 빌드에서 찍기.
-개인정보처리방침 URL: https://trends.edik-choi.workers.dev/privacy
+개인정보처리방침 URL: https://trendr.edik-choi.workers.dev/privacy
 카테고리: 뉴스 및 잡지 / News
 
 ## English

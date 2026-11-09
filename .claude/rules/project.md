@@ -12,7 +12,7 @@
 - `app/` Expo(SDK 58) 앱. 탭 2개: 인기 검색어(나라 칩, 당겨서 새로고침, 키워드 → 구글 검색, 뉴스 → 전면 광고 후 기사) / 설정(알림, 알림 나라, 개인정보처리방침, 내 정보 삭제). 하단 배너. 첫 화면에 알림 권유 카드.
   - 7개 언어(en, ko, ja, de, fr, es, pt): `app/src/i18n.ts`. 기기 언어 중 지원하는 첫 언어, 없으면 영어.
   - 디자인 토큰·공용 컴포넌트는 `app/src/ui.tsx`(청약시그널과 같은 모노크롬).
-- D1 `trends` (`schema.sql`): devices(id=sha256(기기 토큰), geo, locale, tz, push_token, notify).
+- D1 `trendr` (`schema.sql`): devices(id=sha256(기기 토큰), geo, locale, tz, push_token, notify).
 
 ## 명령
 - 루트: `npm test`, `npm run typecheck`, `npm run dev`, `npm run deploy`, `npm run db:init`
@@ -26,7 +26,7 @@
 ## 출시 전 할 일 (app/app.json)
 - 앱 이름 `Trendr`(스토어 등록명은 "Trendr: Trending Searches Now" 식으로 부제 포함). 아이콘은 `python3 scripts/icons.py app/assets store`로 생성. 스토어 문구·그래픽은 `store/`
 - 패키지명 `com.trendr.app` (스토어 출시 후 변경 불가)
-- `extra.apiUrl`: 배포된 Worker 주소 (지금 https://trends.edik-choi.workers.dev 가정)
+- `extra.apiUrl`: 배포된 Worker 주소 (https://trendr.edik-choi.workers.dev)
 - 애드몹 앱 ID(`plugins`의 androidAppId/iosAppId, 지금 Google 샘플)와 `extra.admob` 광고 단위 ID. 비어 있으면 테스트 광고
 - `npx eas-cli@latest init`으로 `extra.eas.projectId`·`updates.url` 채우기. 없으면 푸시 토큰 발급 안 됨
 - Android 푸시: 새 Firebase 프로젝트의 `google-services.json`을 `app/`에 두고 `android.googleServicesFile` 추가, FCM v1 키를 EAS 자격증명에 등록
