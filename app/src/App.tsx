@@ -2,7 +2,7 @@ import * as Notifications from "expo-notifications";
 import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Text, View } from "react-native";
+import { Alert, BackHandler, Text, View } from "react-native";
 import mobileAds from "react-native-google-mobile-ads";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Banner } from "./ads";
@@ -10,7 +10,9 @@ import { deleteMe, getMe, saveMe, type Me } from "./api";
 import { deviceTz, locale, localeGeo, t } from "./i18n";
 import { registerPush } from "./push";
 import SettingsScreen from "./SettingsScreen";
+import TrendDetail from "./TrendDetail";
 import TrendsScreen from "./TrendsScreen";
+import type { Trend } from "../../shared/trends.ts";
 import { Button, Card, color, isDark, s, Segmented } from "./ui";
 
 mobileAds().initialize();
@@ -29,6 +31,13 @@ export default function App() {
   const [me, setMe] = useState<Me | null | undefined>(undefined);
   const [asked, setAsked] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  // 검색어 상세: 탭 위에 열림. 안드로이드 뒤로 가기로 닫힘
+  const [detail, setDetail] = useState<{ geo: string; trend: Trend; rank: number } | null>(null);
+  useEffect(() => {
+    if (!detail) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => (setDetail(null), true));
+    return () => sub.remove();
+  }, [detail]);
 
   useEffect(() => {
     SecureStore.getItemAsync(GEO_KEY).then((g) => setGeo(g), () => setGeo(null));
@@ -60,6 +69,7 @@ export default function App() {
     const g = response?.notification.request.content.data?.geo;
     if (response?.actionIdentifier === Notifications.DEFAULT_ACTION_IDENTIFIER) {
       setTab("trends");
+      setDetail(null);
       if (typeof g === "string") onGeo(g, home);
       setRefreshKey((k) => k + 1);
     }
@@ -112,8 +122,21 @@ export default function App() {
       <StatusBar style={isDark ? "light" : "dark"} />
       <SafeAreaView style={{ flex: 1, backgroundColor: color.canvas }} edges={["top", "bottom"]}>
         <View style={{ flex: 1 }}>
-          {geo === undefined ? null : tab === "trends" ? (
-            <TrendsScreen geo={geo} onGeo={onGeo} refreshKey={refreshKey} header={askCard} />
+          {detail ? (
+            <TrendDetail
+              key={`${detail.geo}:${detail.trend.title}`}
+              {...detail}
+              onClose={() => setDetail(null)}
+              onGeo={(g) => (setDetail(null), setTab("trends"), onGeo(g, home))}
+            />
+          ) : geo === undefined ? null : tab === "trends" ? (
+            <TrendsScreen
+              geo={geo}
+              onGeo={onGeo}
+              refreshKey={refreshKey}
+              header={askCard}
+              onOpen={(g, trend, rank) => setDetail({ geo: g, trend, rank })}
+            />
           ) : (
             <SettingsScreen
               me={me ?? null}
@@ -124,7 +147,7 @@ export default function App() {
             />
           )}
         </View>
-        <View style={{ paddingHorizontal: 20, paddingVertical: 4 }}>
+        <View style={{ paddingHorizontal: 20, paddingVertical: 4, display: detail ? "none" : "flex" }}>
           <Segmented dark items={[["trends", t.tabTrends], ["settings", t.tabSettings]]} value={tab} onChange={setTab} />
         </View>
         <Banner />

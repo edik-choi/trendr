@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { GEOS, isGeo, isLocale, parseTrends, rankTrends, type Trend } from "../shared/trends.ts";
 import { digest, isTimeZone, localHour, PUSH_HOURS } from "./digest.ts";
-import { historyStatements } from "./history.ts";
+import { historyStatements, prunePoints, trendDetail } from "./history.ts";
 import { PRIVACY_HTML } from "./privacy.ts";
 import { isExpoPushToken, sendPush, type PushMessage } from "./push.ts";
 
@@ -58,6 +58,21 @@ app.get("/api/trends", async (c) => {
     console.error(`api/trends failed geo=${geo} colo=${colo}`, e instanceof Error ? e.message : e);
     return c.json({ error: "unavailable", detail: e instanceof Error ? e.message.slice(0, 120) : null }, 502);
   }
+});
+
+// 검색어 상세: 지금 목록의 항목(뉴스 전체) + 순위 변화·지난 기록·다른 나라 기록. 목록에서 내려갔어도 기록은 보여줌
+app.get("/api/trend", async (c) => {
+  const geo = c.req.query("geo")?.toUpperCase();
+  const title = c.req.query("q")?.trim();
+  if (!isGeo(geo) || !title || title.length > 200) return c.json({ error: "invalid" }, 400);
+  const row = await c.env.DB.prepare("SELECT data FROM trends_cache WHERE geo = ?").bind(geo).first<{ data: string }>();
+  const list = row ? (JSON.parse(row.data) as Trend[]) : [];
+  const i = list.findIndex((t) => t.title === title);
+  return c.json(
+    { geo, title, trend: i >= 0 ? list[i] : null, rank: i >= 0 ? i + 1 : null, ...(await trendDetail(c.env.DB, geo, title)) },
+    200,
+    { "cache-control": "public, max-age=300" },
+  );
 });
 
 // ---------- 알림 설정 ----------
@@ -149,6 +164,7 @@ async function collect(env: Env, now = Date.now()) {
       console.error(`history ${geo}`, e instanceof Error ? e.message : e);
     }
   }
+  await prunePoints(env.DB, now).run().catch((e) => console.error("prune", e));
   return byGeo;
 }
 

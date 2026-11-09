@@ -56,3 +56,16 @@ export async function deleteMe() {
   await SecureStore.deleteItemAsync(TOKEN_KEY);
   token = null;
 }
+
+// 검색어 상세. trend/rank: 지금 목록에 있을 때만. points: 최근 3일 시간별 순위
+export type TrendDetail = {
+  geo: string;
+  title: string;
+  trend: Trend | null;
+  rank: number | null;
+  points: { ts: number; rank: number; traffic: number }[];
+  episodes: { first_seen: number; last_seen: number; peak_traffic: number; best_rank: number; hours: number }[];
+  elsewhere: { geo: string; first_seen: number; best_rank: number }[];
+};
+export const getTrendDetail = (geo: string, title: string) =>
+  call<TrendDetail>("GET", `/api/trend?geo=${geo}&q=${encodeURIComponent(title)}`);

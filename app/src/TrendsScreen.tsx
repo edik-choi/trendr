@@ -12,9 +12,10 @@ type Props = {
   onGeo: (geo: string, home: string | null) => void;
   refreshKey: number;
   header?: ReactNode; // 알림 권유 카드
+  onOpen: (geo: string, trend: Trend, rank: number) => void; // 상세 화면 열기
 };
 
-export default function TrendsScreen({ geo, onGeo, refreshKey, header }: Props) {
+export default function TrendsScreen({ geo, onGeo, refreshKey, header, onOpen }: Props) {
   const [data, setData] = useState<TrendList | null>(null);
   const [error, setError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -89,16 +90,19 @@ export default function TrendsScreen({ geo, onGeo, refreshKey, header }: Props) 
       ListFooterComponent={<Text style={[s.sub, { marginTop: 16 }]}>{t.source}</Text>}
       ItemSeparatorComponent={({ leadingItem }) => (data.trends.indexOf(leadingItem) < 3 ? null : <View style={s.divider} />)}
       renderItem={({ item, index }) => (
-        <Row trend={item} rank={index + 1} onNews={(url) => withAd(() => WebBrowser.openBrowserAsync(url))} />
+        <Row
+          trend={item}
+          rank={index + 1}
+          onOpen={() => withAd(() => onOpen(data.geo, item, index + 1))}
+          onNews={(url) => withAd(() => WebBrowser.openBrowserAsync(url))}
+        />
       )}
     />
   );
 }
 
-const search = (q: string) => WebBrowser.openBrowserAsync(`https://www.google.com/search?q=${encodeURIComponent(q)}`);
-
-// 상위 3개(푸시로 보내는 것)는 이미지 카드, 나머지는 한 줄. 줄 어디를 눌러도 검색, 뉴스 줄만 기사
-function Row({ trend, rank, onNews }: { trend: Trend; rank: number; onNews: (url: string) => void }) {
+// 상위 3개(푸시로 보내는 것)는 이미지 카드, 나머지는 한 줄. 줄 어디를 눌러도 상세 화면, 뉴스 줄만 기사
+function Row({ trend, rank, onOpen, onNews }: { trend: Trend; rank: number; onOpen: () => void; onNews: (url: string) => void }) {
   const news = trend.news[0];
   const meta = [trend.traffic && fmt(t.searches, trend.traffic), trend.date > 0 && ago(trend.date)].filter(Boolean).join(" · ");
   const top = rank <= 3;
@@ -106,7 +110,7 @@ function Row({ trend, rank, onNews }: { trend: Trend; rank: number; onNews: (url
     <Pressable
       accessibilityRole="link"
       accessibilityLabel={`${rank}. ${trend.title}`}
-      onPress={() => search(trend.title)}
+      onPress={onOpen}
       style={({ pressed }) => [top ? st.card : st.row, pressed && { opacity: 0.7 }]}
     >
       {top && !!trend.picture && <Image source={{ uri: trend.picture }} style={st.picture} accessibilityIgnoresInvertColors />}

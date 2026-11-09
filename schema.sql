@@ -31,3 +31,14 @@ CREATE TABLE IF NOT EXISTS trend_history (
 );
 CREATE INDEX IF NOT EXISTS trend_history_geo_seen ON trend_history (geo, last_seen);
 CREATE INDEX IF NOT EXISTS trend_history_title ON trend_history (geo, title, last_seen);
+
+-- 시간별 순위·검색량 (상세 화면 순위 변화 그래프). 30일 지난 것은 수집 때 지움
+CREATE TABLE IF NOT EXISTS trend_points (
+  geo TEXT NOT NULL,
+  title TEXT NOT NULL,
+  ts INTEGER NOT NULL,       -- 수집 시각 (unix ms)
+  rank INTEGER NOT NULL,
+  traffic INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS trend_points_title ON trend_points (geo, title, ts);
+CREATE INDEX IF NOT EXISTS trend_points_ts ON trend_points (ts);
