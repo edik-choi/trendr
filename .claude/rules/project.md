@@ -21,7 +21,7 @@
 - Expo 패키지는 `npx expo install`로만 추가.
 
 ## 앱 빌드·업데이트
-청약시그널과 같음: `git push -f origin main:build-preview`(테스트 APK), `main:build-production`(스토어). JS만 바뀌면 `npm run update:production`. 네이티브가 바뀌면 `version` 올리고 새 빌드.
+청약시그널과 같음: `git push -f origin main:build-preview`(테스트 APK), `main:build-production`(스토어). 워크플로가 네이티브 fingerprint를 비교해 같은 빌드가 있으면 빌드 대신 해당 채널로 OTA 업데이트만 보냄. 네이티브가 바뀌면 `version` 올리고 푸시.
 
 ## 출시 전 할 일 (app/app.json)
 - 앱 이름 `Trendr`(스토어 등록명은 "Trendr: Trending Searches Now" 식으로 부제 포함). 아이콘은 `python3 scripts/icons.py app/assets store`로 생성. 스토어 문구·그래픽은 `store/`
