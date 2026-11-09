@@ -2,7 +2,9 @@
 
 ## 해야할 일
 
-- [ ] Worker 배포, EAS 연결·FCM 키 등록 후 테스트 빌드
+- [ ] Worker 배포, 기존 trends Worker 삭제
+- [ ] EAS 연결(eas init), Firebase 서비스 계정 키(FCM v1)를 EAS 자격증명에 등록
+- [ ] 테스트 APK 빌드
 
 ## 완료한 일
 
