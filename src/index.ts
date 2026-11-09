@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { GEOS, isGeo, isLocale, parseTrends, rankTrends, type Trend } from "../shared/trends.ts";
 import { digest, isTimeZone, localHour, PUSH_HOURS } from "./digest.ts";
+import { historyStatements } from "./history.ts";
 import { PRIVACY_HTML } from "./privacy.ts";
 import { isExpoPushToken, sendPush, type PushMessage } from "./push.ts";
 
@@ -95,16 +96,16 @@ app.delete("/api/me", async (c) => {
 
 // ---------- 요약 푸시 ----------
 // 매시 정각 실행. 기기 현지 시각이 PUSH_HOURS인 기기에만, 나라별 상위 3개 검색어를 보냄.
-// ponytail: 무료 플랜은 실행 한 번에 외부 요청 50개(나라 수 + 100명당 1개). 사용자가 수천 명을 넘으면 Queues로 나눠 보내기.
-async function notify(env: Env, now = new Date()) {
+// 주의: 무료 플랜은 실행 한 번에 외부 요청 50개(기록 수집 10개 + 그 밖의 알림 나라 수 + 100명당 1개). 사용자가 수천 명을 넘으면 Queues로 나눠 보내기.
+async function notify(env: Env, byGeo: Map<string, Trend[]>, now = new Date()) {
   const { results } = await env.DB.prepare(
     "SELECT id, geo, locale, tz, push_token FROM devices WHERE notify = 1 AND push_token IS NOT NULL",
   ).all<{ id: string; geo: string; locale: string; tz: string; push_token: string }>();
   const due = results.filter((d) => PUSH_HOURS.includes(localHour(d.tz, now) ?? -1));
   if (!due.length) return;
 
-  const byGeo = new Map<string, Trend[]>();
   for (const geo of new Set(due.map((d) => d.geo))) {
+    if (byGeo.has(geo)) continue;
     try {
       byGeo.set(geo, (await fetchTrends(env.DB, geo)).trends);
     } catch (e) {
@@ -130,7 +131,29 @@ async function notify(env: Env, now = new Date()) {
   console.log(`push: ${targets.length} sent, ${gone.length} unregistered`);
 }
 
+// ---------- 과거 기록 ----------
+// 매시간 GEOS의 목록을 trend_history에 쌓음(나중에 유료 기능: 기록 검색·리포트). 받아 온 목록은 푸시에도 재사용.
+async function collect(env: Env, now = Date.now()) {
+  const byGeo = new Map<string, Trend[]>();
+  for (const geo of GEOS) {
+    try {
+      const { trends, updated } = await fetchTrends(env.DB, geo);
+      byGeo.set(geo, trends);
+      // 구글이 막아 오래된 캐시를 받은 경우엔 "지금도 떠 있다"고 기록하지 않음
+      if (now - updated > FRESH_MS) {
+        console.warn(`history ${geo} skipped (stale ${Math.round((now - updated) / 60000)}m)`);
+        continue;
+      }
+      await env.DB.batch(historyStatements(env.DB, geo, trends, now));
+    } catch (e) {
+      console.error(`history ${geo}`, e instanceof Error ? e.message : e);
+    }
+  }
+  return byGeo;
+}
+
 export default {
   fetch: app.fetch,
-  scheduled: (_e: ScheduledController, env: Env, ctx: ExecutionContext) => ctx.waitUntil(notify(env)),
+  scheduled: (_e: ScheduledController, env: Env, ctx: ExecutionContext) =>
+    ctx.waitUntil(collect(env).then((byGeo) => notify(env, byGeo))),
 };

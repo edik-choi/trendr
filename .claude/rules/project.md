@@ -7,12 +7,12 @@
   - `GET /api/trends?geo=` 로그인 없이. 구글 트렌드 RSS(`trends.google.com/trending/rss?geo=`)를 엣지에 10분 캐시. `home`은 요청 기기의 나라(cf.country).
   - `GET|PUT|DELETE /api/me` Bearer 필요. 알림 설정(geo, locale, tz, notify, pushToken).
   - `/privacy` 스토어 등록용 개인정보처리방침(`src/privacy.ts`, 한·영).
-  - Cron `0 * * * *`: 기기 시간대 기준 지금이 `PUSH_HOURS`(`src/digest.ts`)인 기기에 나라별 상위 3개 푸시(Expo Push). DeviceNotRegistered면 토큰 비움.
+  - Cron `0 * * * *`: ① `collect` — GEOS 10개 나라 목록을 `trend_history`에 기록(`src/history.ts`) ② `notify` — 기기 시간대 기준 지금이 `PUSH_HOURS`(`src/digest.ts`)인 기기에 나라별 상위 3개 푸시(Expo Push, ①에서 받은 목록 재사용). DeviceNotRegistered면 토큰 비움.
 - `shared/trends.ts`: RSS 파싱, 순위, 나라·언어 목록. 서버와 앱이 같이 씀.
 - `app/` Expo(SDK 58) 앱. 탭 2개: 인기 검색어(나라 칩, 당겨서 새로고침, 키워드 → 구글 검색, 뉴스 → 전면 광고 후 기사) / 설정(알림, 알림 나라, 개인정보처리방침, 내 정보 삭제). 하단 배너. 첫 화면에 알림 권유 카드.
   - 7개 언어(en, ko, ja, de, fr, es, pt): `app/src/i18n.ts`. 기기 언어 중 지원하는 첫 언어, 없으면 영어.
   - 디자인 토큰·공용 컴포넌트는 `app/src/ui.tsx`(청약시그널과 같은 모노크롬).
-- D1 `trendr` (`schema.sql`): devices(id=sha256(기기 토큰), geo, locale, tz, push_token, notify).
+- D1 `trendr` (`schema.sql`): devices(id=sha256(기기 토큰), geo, locale, tz, push_token, notify), trend_history(geo, title, first_seen, last_seen, peak_traffic, best_rank, hours, news — 같은 검색어가 12시간 안에 다시 보이면 같은 행 갱신).
 
 ## 명령
 - 루트: `npm test`, `npm run typecheck`, `npm run dev`, `npm run deploy`, `npm run db:init`
@@ -33,5 +33,6 @@
 
 ## 결정사항
 - 첫 버전: 목록 + 하루 3번 요약 푸시. 관심 키워드 알림은 다음 단계(유료 기능 후보).
+- 유료 기능 후보(마케터용): 관심 키워드 즉시 알림, 슬랙·이메일·웹훅, 과거 기록 검색·리포트, AI 브리핑, 나라 간 확산 추적, CSV·API. 과거 기록은 2026-11-09부터 수집. 유료화 전 구글 트렌드 데이터 사용 약관 확인 필요.
 - 무료 플랜 cron 한 번에 외부 요청 50개(나라 수 + 100명당 1개). 사용자가 수천 명을 넘으면 Queues로 분산.
 - 개인정보: 이름·연락처 수집 안 함. 설정에서 삭제 시 서버 정보 즉시 삭제.
