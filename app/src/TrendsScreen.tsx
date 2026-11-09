@@ -5,6 +5,7 @@ import type { Trend } from "../../shared/trends.ts";
 import { useInterstitialBefore } from "./ads";
 import { getTrends, type TrendList } from "./api";
 import { ago, countryName, fmt, t } from "./i18n";
+import { useShareCard } from "./share";
 import { Button, Chip, color, Empty, radius, s, Skeleton } from "./ui";
 
 type Props = {
@@ -21,6 +22,7 @@ export default function TrendsScreen({ geo, onGeo, refreshKey, header, onOpen }:
   const [refreshing, setRefreshing] = useState(false);
   const withAd = useInterstitialBefore();
   const chips = useRef<ComponentRef<typeof ScrollView>>(null);
+  const card = useShareCard();
 
   const load = useCallback(async () => {
     setError(false);
@@ -59,6 +61,8 @@ export default function TrendsScreen({ geo, onGeo, refreshKey, header, onOpen }:
   const switching = !!geo && geo !== data.geo && !error;
 
   return (
+    <View style={{ flex: 1 }}>
+    {card.element}
     <FlatList
       data={switching ? [] : data.trends}
       keyExtractor={(k) => k.title}
@@ -68,7 +72,14 @@ export default function TrendsScreen({ geo, onGeo, refreshKey, header, onOpen }:
         <>
           <View style={st.head}>
             <Text style={[s.h1, { marginBottom: 0 }]}>Trendr</Text>
-            {!!data.updated && !switching && <Text style={s.sub}>{fmt(t.updated, ago(data.updated))}</Text>}
+            <View style={{ flexDirection: "row", alignItems: "baseline", gap: 12 }}>
+              {!!data.updated && !switching && <Text style={s.sub}>{fmt(t.updated, ago(data.updated))}</Text>}
+              {!switching && data.trends.length > 0 && (
+                <Pressable onPress={() => card.shareTop(data.geo, data.trends)} accessibilityRole="button" accessibilityLabel={t.shareTop} hitSlop={10}>
+                  <Text style={[s.body, { fontWeight: "600" }]}>{t.share}</Text>
+                </Pressable>
+              )}
+            </View>
           </View>
           <ScrollView ref={chips} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingBottom: 16 }}>
             {geos.map((g) => {
@@ -98,6 +109,7 @@ export default function TrendsScreen({ geo, onGeo, refreshKey, header, onOpen }:
         />
       )}
     />
+    </View>
   );
 }
 

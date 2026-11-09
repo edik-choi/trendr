@@ -13,6 +13,7 @@
 - `app/` Expo(SDK 58) 앱. 탭 2개: 인기 검색어(나라 칩, 당겨서 새로고침, 줄 → 전면 광고 후 상세 화면 `TrendDetail.tsx`(탭 위에 열림, 안드로이드 뒤로 가기), 뉴스 줄 → 전면 광고 후 기사) / 설정(알림, 알림 나라, 개인정보처리방침, 내 정보 삭제). 하단 배너. 첫 화면에 알림 권유 카드.
   - 7개 언어(en, ko, ja, de, fr, es, pt): `app/src/i18n.ts`. 기기 언어 중 지원하는 첫 언어, 없으면 영어.
   - 디자인 토큰·공용 컴포넌트는 `app/src/ui.tsx`(청약시그널과 같은 모노크롬).
+  - 공유 카드 `app/src/share.tsx`: 화면 밖에 카드를 그려 1080×1350 PNG로 캡처(react-native-view-shot) → 시스템 공유창(expo-sharing). 상세 화면 "공유" = 검색어 카드, 홈 "공유" = TOP 5 카드. 항상 어두운 카드. 실패 시 텍스트 공유.
 - D1 `trendr` (`schema.sql`): devices(id=sha256(기기 토큰), geo, locale, tz, push_token, notify), trend_history(geo, title, first_seen, last_seen, peak_traffic, best_rank, hours, news — 같은 검색어가 12시간 안에 다시 보이면 같은 행 갱신), trend_points(geo, title, ts, rank, traffic — 시간별, 30일 보관), trends_cache(나라별 마지막 목록).
 
 ## 명령

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Trendr",
     "slug": "trendr",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -61,7 +61,8 @@
           "enforceContrast": false,
           "style": "dark"
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "scheme": "trendr",
     "extra": {

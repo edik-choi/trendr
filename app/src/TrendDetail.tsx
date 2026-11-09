@@ -1,9 +1,10 @@
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { Trend } from "../../shared/trends.ts";
 import { getTrendDetail, type TrendDetail as Detail } from "./api";
 import { ago, countryName, fmt, t } from "./i18n";
+import { useShareCard } from "./share";
 import { Button, color, radius, s, Skeleton } from "./ui";
 
 type Props = {
@@ -33,10 +34,12 @@ export default function TrendDetail({ geo, trend: initial, rank: initialRank, on
     ep && ep.hours > 1 && fmt(t.trendingHours, ep.hours),
   ].filter(Boolean).join(" · ");
 
-  const share = () =>
-    Share.share({ message: `${trend.title}\n${fmt(t.shareText, countryName(geo))}\nhttps://www.google.com/search?q=${encodeURIComponent(trend.title)}` });
+  const card = useShareCard();
+  const share = () => card.shareTrend(geo, trend, rank);
 
   return (
+    <View style={{ flex: 1 }}>
+    {card.element}
     <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
       <View style={st.top}>
         <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel={t.back} hitSlop={12} style={st.back}>
@@ -88,6 +91,7 @@ export default function TrendDetail({ geo, trend: initial, rank: initialRank, on
         ))}
       </View>
     </ScrollView>
+    </View>
   );
 }
 

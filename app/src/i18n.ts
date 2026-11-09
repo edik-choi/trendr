@@ -47,6 +47,10 @@ const en = {
   share: "Share",
   trendingHours: "Trending for {n} h",
   shareText: "Trending now in {n} on Trendr",
+  cardHeading: "Trending now in {n}",
+  cardTop: "Top 5 searches in {n}",
+  cardFooter: "Live trending searches · Trendr",
+  shareTop: "Share top 5",
 };
 type Strings = typeof en;
 
@@ -92,6 +96,10 @@ const STRINGS: Record<Locale, Strings> = {
     share: "공유",
     trendingHours: "{n}시간째 인기",
     shareText: "지금 {n} 인기 검색어 · Trendr",
+    cardHeading: "지금 {n} 인기 검색어",
+    cardTop: "지금 {n} 인기 검색어 TOP 5",
+    cardFooter: "실시간 인기 검색어 · Trendr",
+    shareTop: "TOP 5 공유",
   },
   ja: {
     tabTrends: "急上昇ワード",
@@ -133,6 +141,10 @@ const STRINGS: Record<Locale, Strings> = {
     share: "共有",
     trendingHours: "{n}時間ランクイン中",
     shareText: "いま{n}で話題の検索ワード · Trendr",
+    cardHeading: "いま{n}で話題の検索ワード",
+    cardTop: "いま{n}の急上昇ワード TOP 5",
+    cardFooter: "リアルタイム急上昇ワード · Trendr",
+    shareTop: "TOP 5を共有",
   },
   de: {
     tabTrends: "Trends",
@@ -174,6 +186,10 @@ const STRINGS: Record<Locale, Strings> = {
     share: "Teilen",
     trendingHours: "Seit {n} Std. im Trend",
     shareText: "Gerade im Trend in {n} · Trendr",
+    cardHeading: "Gerade im Trend in {n}",
+    cardTop: "Top 5 Suchanfragen in {n}",
+    cardFooter: "Trends in Echtzeit · Trendr",
+    shareTop: "Top 5 teilen",
   },
   fr: {
     tabTrends: "Tendances",
@@ -215,6 +231,10 @@ const STRINGS: Record<Locale, Strings> = {
     share: "Partager",
     trendingHours: "En tendance depuis {n} h",
     shareText: "En tendance en ce moment en {n} · Trendr",
+    cardHeading: "En tendance en {n}",
+    cardTop: "Top 5 des recherches en {n}",
+    cardFooter: "Tendances en temps réel · Trendr",
+    shareTop: "Partager le top 5",
   },
   es: {
     tabTrends: "Tendencias",
@@ -256,6 +276,10 @@ const STRINGS: Record<Locale, Strings> = {
     share: "Compartir",
     trendingHours: "Tendencia desde hace {n} h",
     shareText: "Tendencia ahora en {n} · Trendr",
+    cardHeading: "Tendencia ahora en {n}",
+    cardTop: "Top 5 búsquedas en {n}",
+    cardFooter: "Tendencias en tiempo real · Trendr",
+    shareTop: "Compartir top 5",
   },
   pt: {
     tabTrends: "Em alta",
@@ -297,6 +321,10 @@ const STRINGS: Record<Locale, Strings> = {
     share: "Compartilhar",
     trendingHours: "Em alta há {n} h",
     shareText: "Em alta agora em {n} · Trendr",
+    cardHeading: "Em alta agora em {n}",
+    cardTop: "Top 5 pesquisas em {n}",
+    cardFooter: "Tendências em tempo real · Trendr",
+    shareTop: "Compartilhar top 5",
   },
 };
 
