@@ -1,0 +1,80 @@
+<!-- 공통 규칙 시작: claude-rules 레포에서 자동 동기화됩니다. 여기서 수정하지 마세요 -->
+# 공통 규칙
+
+## 토큰 사용량
+
+토큰 사용량을 최소로 합니다. 답은 짧게 쓰고, 묻지 않은 설명과 요약은 덧붙이지 않습니다. 파일은 필요한 부분만 읽고, 이미 읽은 내용은 다시 읽지 않습니다. 서브에이전트는 사용자가 요청할 때만 씁니다.
+
+## 언어
+
+커밋 메시지, 풀 리퀘스트 본문, 작업 메시지는 한글로 작성합니다. 코드 안의 주석과 식별자는 기존 코드의 방식을 그대로 따릅니다.
+
+## 대시보드 pane
+
+Claude Code CLI에서는 mod pane으로 화면 우측에 대시보드를 띄웁니다. 탭 없이 pane 하나만 씁니다.
+
+- 토큰 사용량: 현재(5시간) 사용량과 이번 주 사용량을 프로그레스바와 %로 표시하고, 옆에 리셋 시각을 씁니다.
+- 해야할 일, 완료한 일: 레포 루트의 `TODO.md`에서 `- [ ]`는 해야할 일, `- [x]`는 완료한 일로 읽어 표시하고, 파일이 바뀌면 바로 반영합니다.
+- 스타일: 텍스트는 모두 흰색, 프로그레스바의 채운 부분만 연두색(`#9be564`), 남은 부분은 흐린 `░`입니다. 섹션 제목과 내용 사이, 구분선(`─`) 위아래에 빈 줄을 하나씩 둡니다.
+
+## TODO 작성
+
+레포 루트의 `TODO.md`로 작업을 관리합니다.
+
+- 형식: `## 해야할 일` 아래에 `- [ ] 항목`, `## 완료한 일` 아래에 `- [x] 항목`을 씁니다. 한 줄에 한 항목, 무엇을 하는지 짧게 씁니다.
+- 대시보드는 `- [ ]`, `- [x]`로 시작하는 줄만 읽습니다. 번호 목록(`1.`)이나 체크박스 없는 `- ` 줄은 표시되지 않으니 쓰지 않습니다. 메모리나 다른 할 일 목록이 다른 형식을 쓰더라도 `TODO.md`는 이 형식을 지키고, 형식이 어긋난 `TODO.md`를 발견하면 내용은 그대로 두고 형식만 맞춥니다.
+- 작업을 시작하면 해야할 일에 추가하고, 끝나면 `[x]`로 바꿔 완료한 일의 맨 위로 옮깁니다.
+- 사용자가 요청한 작업 단위로 적고, 작업 중의 세부 단계는 적지 않습니다.
+- 다른 사람이 적은 항목은 지우거나 고치지 않습니다.
+- `TODO.md`만 따로 커밋하지 않습니다. 해야할 일 추가를 포함한 `TODO.md` 변경은 어떤 작업의 푸시인지 상관없이 다음 커밋·푸시에 함께 올립니다.
+
+## 커밋과 푸시
+
+사용자가 작업 후 커밋이나 푸시를 요청하면 커밋하고 푸시까지 진행합니다. `main`이 아닌 브랜치에서 작업 중이면 `main`에 병합하고 `main`도 푸시합니다.
+
+## 서버리스 펑션 번들 크기
+
+이 규칙은 Next.js 프로젝트에만 해당합니다. 서버리스 펑션 하나하나의 번들 크기를 작게 유지합니다. 설정은 이미 배포된 빌드에는 영향이 없고, 다음 git push로 새 빌드가 생성될 때부터 적용됩니다.
+
+- Standalone 모드: `next.config`에 `output: 'standalone'`을 둡니다. 서버 실행에 필요한 파일만 추려서 내보냅니다.
+- File Tracing 제외: 런타임에 쓰지 않는데 트레이싱에 딸려 들어가는 파일은 `outputFileTracingExcludes`에 넣어 뺍니다. 빌드 도구, 소스맵, 테스트, 문서, 브라우저 전용 패키지(예: `**/*.map`, `node_modules/@swc/**`, `node_modules/typescript/**`, `node_modules/@esbuild/**`)가 대상입니다. 라우트 키는 실제로 필요한 라우트를 빼지 않도록 좁게 씁니다.
+- 펑션이 실제로 읽는 파일(폰트, 데이터, 바이너리 등)은 빼지 않습니다. 필요한 파일이 트레이싱에 잡히지 않으면 `outputFileTracingIncludes`로 넣습니다.
+<!-- 공통 규칙 끝 -->
+
+# Trending Now (가칭)
+
+애드몹 수익형 글로벌 모바일 앱. 나라별 구글 "지금 뜨는 검색어"와 관련 뉴스를 보여주고, 하루 3번(현지 8·12·19시) 상위 3개를 요약 푸시. 푸시 → 앱 접속 → 광고 노출이 수익 구조. 구조는 청약시그널(edik-choi/subscription)과 같음.
+
+## 구조
+- `src/` Cloudflare Worker (Hono).
+  - `GET /api/trends?geo=` 로그인 없이. 구글 트렌드 RSS(`trends.google.com/trending/rss?geo=`)를 엣지에 10분 캐시. `home`은 요청 기기의 나라(cf.country).
+  - `GET|PUT|DELETE /api/me` Bearer 필요. 알림 설정(geo, locale, tz, notify, pushToken).
+  - `/privacy` 스토어 등록용 개인정보처리방침(`src/privacy.ts`, 한·영).
+  - Cron `0 * * * *`: 기기 시간대 기준 지금이 `PUSH_HOURS`(`src/digest.ts`)인 기기에 나라별 상위 3개 푸시(Expo Push). DeviceNotRegistered면 토큰 비움.
+- `shared/trends.ts`: RSS 파싱, 순위, 나라·언어 목록. 서버와 앱이 같이 씀.
+- `app/` Expo(SDK 58) 앱. 탭 2개: 인기 검색어(나라 칩, 당겨서 새로고침, 키워드 → 구글 검색, 뉴스 → 전면 광고 후 기사) / 설정(알림, 알림 나라, 개인정보처리방침, 내 정보 삭제). 하단 배너. 첫 화면에 알림 권유 카드.
+  - 7개 언어(en, ko, ja, de, fr, es, pt): `app/src/i18n.ts`. 기기 언어 중 지원하는 첫 언어, 없으면 영어.
+  - 디자인 토큰·공용 컴포넌트는 `app/src/ui.tsx`(청약시그널과 같은 모노크롬).
+- D1 `trends` (`schema.sql`): devices(id=sha256(기기 토큰), geo, locale, tz, push_token, notify).
+
+## 명령
+- 루트: `npm test`, `npm run typecheck`, `npm run dev`, `npm run deploy`, `npm run db:init`
+  - cron 테스트: `wrangler dev --test-scheduled` 후 `/__scheduled` 호출
+- `app/`: `npx tsc --noEmit`, `npx expo-doctor`, `npx expo start`(개발 빌드 필요, Expo Go 불가), 빌드는 청약시그널과 같은 EAS Workflows(`app/.eas/workflows/`)
+- Expo 패키지는 `npx expo install`로만 추가.
+
+## 앱 빌드·업데이트
+청약시그널과 같음: `git push -f origin main:build-preview`(테스트 APK), `main:build-production`(스토어). JS만 바뀌면 `npm run update:production`. 네이티브가 바뀌면 `version` 올리고 새 빌드.
+
+## 출시 전 할 일 (app/app.json)
+- `name`(지금 "Trending Now" 가칭), 아이콘·스플래시(`app/assets`는 청약시그널 것을 임시로 복사)
+- 패키지명 `com.aikunst.trends` (스토어 출시 후 변경 불가)
+- `extra.apiUrl`: 배포된 Worker 주소 (지금 https://trends.edik-choi.workers.dev 가정)
+- 애드몹 앱 ID(`plugins`의 androidAppId/iosAppId, 지금 Google 샘플)와 `extra.admob` 광고 단위 ID. 비어 있으면 테스트 광고
+- `npx eas-cli@latest init`으로 `extra.eas.projectId`·`updates.url` 채우기. 없으면 푸시 토큰 발급 안 됨
+- Android 푸시: 새 Firebase 프로젝트의 `google-services.json`을 `app/`에 두고 `android.googleServicesFile` 추가, FCM v1 키를 EAS 자격증명에 등록
+
+## 결정사항
+- 첫 버전: 목록 + 하루 3번 요약 푸시. 관심 키워드 알림은 다음 단계(유료 기능 후보).
+- 무료 플랜 cron 한 번에 외부 요청 50개(나라 수 + 100명당 1개). 사용자가 수천 명을 넘으면 Queues로 분산.
+- 개인정보: 이름·연락처 수집 안 함. 설정에서 삭제 시 서버 정보 즉시 삭제.

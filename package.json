@@ -1,0 +1,21 @@
+{
+  "name": "trends",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test shared/*.test.ts src/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "db:init": "wrangler d1 execute trends --remote --file schema.sql"
+  },
+  "dependencies": {
+    "hono": "^4.13.16"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261103.1",
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.156.2"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "claude-rules": {
+      "source": {
+        "source": "github",
+        "repo": "edik-choi/claude-rules"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "dashboard@claude-rules": true
+  }
+}
