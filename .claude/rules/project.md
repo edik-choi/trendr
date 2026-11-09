@@ -27,9 +27,9 @@
 - 앱 이름 `Trendr`(스토어 등록명은 "Trendr: Trending Searches Now" 식으로 부제 포함). 아이콘은 `python3 scripts/icons.py app/assets store`로 생성. 스토어 문구·그래픽은 `store/`
 - 패키지명 `com.trendr.app` (스토어 출시 후 변경 불가)
 - `extra.apiUrl`: 배포된 Worker 주소 (https://trendr.edik-choi.workers.dev)
-- 애드몹 앱 ID(`plugins`의 androidAppId/iosAppId, 지금 Google 샘플)와 `extra.admob` 광고 단위 ID. 비어 있으면 테스트 광고
+- 애드몹: Android 앱(Trendr, `~8605128106`)·배너·전면 광고 단위 등록 완료. iOS는 아직 샘플 ID(출시할 때 애드몹에 iOS 앱 추가). production 채널이 아니면 테스트 광고
 - `npx eas-cli@latest init`으로 `extra.eas.projectId`·`updates.url` 채우기. 없으면 푸시 토큰 발급 안 됨
-- Android 푸시: 새 Firebase 프로젝트의 `google-services.json`을 `app/`에 두고 `android.googleServicesFile` 추가, FCM v1 키를 EAS 자격증명에 등록
+- Android 푸시: Firebase 프로젝트 `trendr-99ede`에 com.trendr.app 등록, `app/google-services.json` 반영. 남은 일: Firebase 서비스 계정 키(FCM v1)를 EAS 자격증명에 등록
 
 ## 결정사항
 - 첫 버전: 목록 + 하루 3번 요약 푸시. 관심 키워드 알림은 다음 단계(유료 기능 후보).

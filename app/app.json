@@ -21,7 +21,8 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.trendr.app"
+      "package": "com.trendr.app",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -41,7 +42,7 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "androidAppId": "ca-app-pub-2222587566046092~8605128106",
           "iosAppId": "ca-app-pub-3940256099942544~1458002511"
         }
       ],
@@ -66,9 +67,9 @@
     "extra": {
       "apiUrl": "https://trendr.edik-choi.workers.dev",
       "admob": {
-        "androidBanner": "",
+        "androidBanner": "ca-app-pub-2222587566046092/6898515956",
         "iosBanner": "",
-        "androidInterstitial": "",
+        "androidInterstitial": "ca-app-pub-2222587566046092/8030413030",
         "iosInterstitial": ""
       }
     },

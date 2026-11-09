@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "144473256512",
+    "project_id": "trendr-99ede",
+    "storage_bucket": "trendr-99ede.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:144473256512:android:099c86ac437246ee26a5a5",
+        "android_client_info": {
+          "package_name": "com.trendr.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCauV7-nK9--tysPj6o5sHqP_jRUYe_KXo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
