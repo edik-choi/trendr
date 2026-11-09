@@ -10,7 +10,7 @@ import { Button, color, radius, s, Skeleton } from "./ui";
 type Props = {
   geo: string;
   trend: Trend; // 목록에서 넘겨받은 항목: 상세를 불러오는 동안에도 바로 보여줌
-  rank: number;
+  rank: number | null; // 위젯·링크로 열면 모름(상세를 받으면 채워짐)
   onClose: () => void;
   onGeo: (geo: string) => void; // "다른 나라에서도" 칩 → 그 나라 목록으로
 };

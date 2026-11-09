@@ -14,6 +14,7 @@
   - 7개 언어(en, ko, ja, de, fr, es, pt): `app/src/i18n.ts`. 기기 언어 중 지원하는 첫 언어, 없으면 영어.
   - 디자인 토큰·공용 컴포넌트는 `app/src/ui.tsx`(청약시그널과 같은 모노크롬).
   - 공유 카드 `app/src/share.tsx`: 화면 밖에 카드를 그려 1080×1350 PNG로 캡처(react-native-view-shot) → 시스템 공유창(expo-sharing). 상세 화면 "공유" = 검색어 카드, 홈 "공유" = TOP 5 카드. 항상 어두운 카드. 실패 시 텍스트 공유.
+  - 홈 화면 위젯(안드로이드) `app/src/widget.tsx`(react-native-android-widget, 이름 `Top3`): 마지막으로 본 나라 상위 3개. 30분마다 + 앱이 목록을 받을 때 갱신. 줄 → `trendr://trend?geo=&q=` 딥링크로 상세 화면(App.tsx에서 처리). 핸들러는 `app/index.ts`에 등록. iOS 위젯은 미구현(Swift 필요).
 - D1 `trendr` (`schema.sql`): devices(id=sha256(기기 토큰), geo, locale, tz, push_token, notify), trend_history(geo, title, first_seen, last_seen, peak_traffic, best_rank, hours, news — 같은 검색어가 12시간 안에 다시 보이면 같은 행 갱신), trend_points(geo, title, ts, rank, traffic — 시간별, 30일 보관), trends_cache(나라별 마지막 목록).
 
 ## 명령

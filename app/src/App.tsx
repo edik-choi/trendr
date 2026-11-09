@@ -2,13 +2,14 @@ import * as Notifications from "expo-notifications";
 import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, BackHandler, Text, View } from "react-native";
+import { Alert, BackHandler, Linking, Text, View } from "react-native";
 import mobileAds from "react-native-google-mobile-ads";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Banner } from "./ads";
 import { deleteMe, getMe, saveMe, type Me } from "./api";
 import { deviceTz, locale, localeGeo, t } from "./i18n";
 import { registerPush } from "./push";
+import { GEO_KEY } from "./widget";
 import SettingsScreen from "./SettingsScreen";
 import TrendDetail from "./TrendDetail";
 import TrendsScreen from "./TrendsScreen";
@@ -18,7 +19,6 @@ import { Button, Card, color, isDark, s, Segmented } from "./ui";
 mobileAds().initialize();
 
 type Tab = "trends" | "settings";
-const GEO_KEY = "geo"; // 마지막으로 본 나라
 const ASKED_KEY = "asked_push"; // 알림 권유 카드를 닫았는지
 
 const tryOrAlert = (f: () => Promise<void>) =>
@@ -32,7 +32,22 @@ export default function App() {
   const [asked, setAsked] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
   // 검색어 상세: 탭 위에 열림. 안드로이드 뒤로 가기로 닫힘
-  const [detail, setDetail] = useState<{ geo: string; trend: Trend; rank: number } | null>(null);
+  const [detail, setDetail] = useState<{ geo: string; trend: Trend; rank: number | null } | null>(null);
+  // 위젯 줄 누르기 등 trendr://trend?geo=KR&q=검색어 → 상세 화면
+  useEffect(() => {
+    const open = (url?: string | null) => {
+      const m = url?.match(/^trendr:\/\/trend\?(.*)$/);
+      if (!m) return;
+      // RN의 URLSearchParams.get은 구현이 불완전해서 직접 나눔
+      const q = Object.fromEntries(m[1].split("&").map((kv) => kv.split("=").map((x) => decodeURIComponent(x.replace(/\+/g, " ")))));
+      const g = q.geo;
+      const title = q.q;
+      if (g && title) setDetail({ geo: g, trend: { title, traffic: "", date: 0, news: [] }, rank: null });
+    };
+    Linking.getInitialURL().then(open, () => {});
+    const sub = Linking.addEventListener("url", (e) => open(e.url));
+    return () => sub.remove();
+  }, []);
   useEffect(() => {
     if (!detail) return;
     const sub = BackHandler.addEventListener("hardwareBackPress", () => (setDetail(null), true));

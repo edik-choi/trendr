@@ -51,6 +51,7 @@ const en = {
   cardTop: "Top 5 searches in {n}",
   cardFooter: "Live trending searches · Trendr",
   shareTop: "Share top 5",
+  widgetOpen: "Open Trendr to see what's trending",
 };
 type Strings = typeof en;
 
@@ -100,6 +101,7 @@ const STRINGS: Record<Locale, Strings> = {
     cardTop: "지금 {n} 인기 검색어 TOP 5",
     cardFooter: "실시간 인기 검색어 · Trendr",
     shareTop: "TOP 5 공유",
+    widgetOpen: "눌러서 인기 검색어 보기",
   },
   ja: {
     tabTrends: "急上昇ワード",
@@ -145,6 +147,7 @@ const STRINGS: Record<Locale, Strings> = {
     cardTop: "いま{n}の急上昇ワード TOP 5",
     cardFooter: "リアルタイム急上昇ワード · Trendr",
     shareTop: "TOP 5を共有",
+    widgetOpen: "タップして急上昇ワードを見る",
   },
   de: {
     tabTrends: "Trends",
@@ -190,6 +193,7 @@ const STRINGS: Record<Locale, Strings> = {
     cardTop: "Top 5 Suchanfragen in {n}",
     cardFooter: "Trends in Echtzeit · Trendr",
     shareTop: "Top 5 teilen",
+    widgetOpen: "Tippen, um die Trends zu sehen",
   },
   fr: {
     tabTrends: "Tendances",
@@ -235,6 +239,7 @@ const STRINGS: Record<Locale, Strings> = {
     cardTop: "Top 5 des recherches en {n}",
     cardFooter: "Tendances en temps réel · Trendr",
     shareTop: "Partager le top 5",
+    widgetOpen: "Touchez pour voir les tendances",
   },
   es: {
     tabTrends: "Tendencias",
@@ -280,6 +285,7 @@ const STRINGS: Record<Locale, Strings> = {
     cardTop: "Top 5 búsquedas en {n}",
     cardFooter: "Tendencias en tiempo real · Trendr",
     shareTop: "Compartir top 5",
+    widgetOpen: "Toca para ver las tendencias",
   },
   pt: {
     tabTrends: "Em alta",
@@ -325,6 +331,7 @@ const STRINGS: Record<Locale, Strings> = {
     cardTop: "Top 5 pesquisas em {n}",
     cardFooter: "Tendências em tempo real · Trendr",
     shareTop: "Compartilhar top 5",
+    widgetOpen: "Toque para ver as tendências",
   },
 };
 

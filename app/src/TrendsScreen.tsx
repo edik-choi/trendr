@@ -6,6 +6,7 @@ import { useInterstitialBefore } from "./ads";
 import { getTrends, type TrendList } from "./api";
 import { ago, countryName, fmt, t } from "./i18n";
 import { useShareCard } from "./share";
+import { updateWidget } from "./widget";
 import { Button, Chip, color, Empty, radius, s, Skeleton } from "./ui";
 
 type Props = {
@@ -30,6 +31,7 @@ export default function TrendsScreen({ geo, onGeo, refreshKey, header, onOpen }:
       const d = await getTrends(geo ?? undefined);
       if (!d) throw new Error("404");
       setData(d);
+      updateWidget(d.geo, d.trends, d.updated);
       if (d.geo !== geo) onGeo(d.geo, d.home);
     } catch (e) {
       console.warn("trends", e); // 원인은 Worker 로그에 남음
