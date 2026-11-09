@@ -3,11 +3,11 @@
 ## 해야할 일
 
 - [ ] Worker 배포, 기존 trends Worker 삭제
-- [ ] EAS 연결(eas init), Firebase 서비스 계정 키(FCM v1)를 EAS 자격증명에 등록
 - [ ] 테스트 APK 빌드
 
 ## 완료한 일
 
+- [x] EAS 연결(eas init), Firebase 서비스 계정 키(FCM v1)를 EAS 자격증명에 등록
 - [x] Firebase 안드로이드 앱 등록, google-services.json 반영
 - [x] 애드몹 Android 앱·배너·전면 광고 단위 만들고 app.json 반영
 - [x] 프로젝트 이름 trends → trendr (레포, Worker, D1, 패키지, API 주소)
