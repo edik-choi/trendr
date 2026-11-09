@@ -27,7 +27,7 @@ export default function SettingsScreen({ me, home, onNotify, onAlertGeo, onDelet
             value={!!me?.notify}
             onValueChange={onNotify}
             trackColor={{ true: color.ink, false: color.hairline }}
-            thumbColor="#fff"
+            thumbColor={color.canvas}
             accessibilityLabel={t.notify}
           />
         </View>

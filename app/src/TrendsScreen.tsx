@@ -1,11 +1,11 @@
 import * as WebBrowser from "expo-web-browser";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { FlatList, Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useRef, useState, type ComponentRef, type ReactNode } from "react";
+import { FlatList, Image, type LayoutChangeEvent, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { Trend } from "../../shared/trends.ts";
 import { useInterstitialBefore } from "./ads";
 import { getTrends, type TrendList } from "./api";
 import { ago, countryName, fmt, t } from "./i18n";
-import { Button, Chip, color, Empty, Loading, radius, s } from "./ui";
+import { Button, Chip, color, Empty, radius, s, Skeleton } from "./ui";
 
 type Props = {
   geo: string | null; // null: 서버가 기기 나라로 정함
@@ -19,6 +19,7 @@ export default function TrendsScreen({ geo, onGeo, refreshKey, header }: Props) 
   const [error, setError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const withAd = useInterstitialBefore();
+  const chips = useRef<ComponentRef<typeof ScrollView>>(null);
 
   const load = useCallback(async () => {
     setError(false);
@@ -52,11 +53,13 @@ export default function TrendsScreen({ geo, onGeo, refreshKey, header }: Props) 
       </View>
     );
   }
-  if (!data) return <Loading />;
+  if (!data) return <View style={{ padding: 20 }}><Skeleton /></View>;
+  // 나라를 바꾼 직후: 새 목록이 올 때까지 예전 목록 대신 로딩 표시
+  const switching = !!geo && geo !== data.geo && !error;
 
   return (
     <FlatList
-      data={data.trends}
+      data={switching ? [] : data.trends}
       keyExtractor={(k) => k.title}
       contentContainerStyle={{ padding: 20, paddingBottom: 32 }}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={color.ink} />}
@@ -64,18 +67,25 @@ export default function TrendsScreen({ geo, onGeo, refreshKey, header }: Props) 
         <>
           <View style={st.head}>
             <Text style={[s.h1, { marginBottom: 0 }]}>Trendr</Text>
-            {!!data.updated && <Text style={s.sub}>{fmt(t.updated, ago(data.updated))}</Text>}
+            {!!data.updated && !switching && <Text style={s.sub}>{fmt(t.updated, ago(data.updated))}</Text>}
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingBottom: 16 }}>
-            {geos.map((g) => (
-              <Chip key={g} label={countryName(g)} on={g === (geo ?? data.geo)} onPress={() => onGeo(g, data.home)} />
-            ))}
+          <ScrollView ref={chips} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingBottom: 16 }}>
+            {geos.map((g) => {
+              const on = g === (geo ?? data.geo);
+              // 처음 그릴 때 선택된 나라가 화면 밖이면 보이게 스크롤
+              const show = on ? (e: LayoutChangeEvent) => chips.current?.scrollTo({ x: Math.max(0, e.nativeEvent.layout.x - 20), animated: false }) : undefined;
+              return (
+                <View key={g} onLayout={show}>
+                  <Chip label={countryName(g)} on={on} onPress={() => onGeo(g, data.home)} />
+                </View>
+              );
+            })}
           </ScrollView>
           {header}
           {error && <Text style={s.error}>{t.error}</Text>}
         </>
       }
-      ListEmptyComponent={<Empty>{t.empty}</Empty>}
+      ListEmptyComponent={switching ? <Skeleton /> : <Empty>{t.empty}</Empty>}
       ListFooterComponent={<Text style={[s.sub, { marginTop: 16 }]}>{t.source}</Text>}
       ItemSeparatorComponent={({ leadingItem }) => (data.trends.indexOf(leadingItem) < 3 ? null : <View style={s.divider} />)}
       renderItem={({ item, index }) => (

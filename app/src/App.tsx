@@ -11,7 +11,7 @@ import { deviceTz, locale, localeGeo, t } from "./i18n";
 import { registerPush } from "./push";
 import SettingsScreen from "./SettingsScreen";
 import TrendsScreen from "./TrendsScreen";
-import { Button, Card, color, s, Segmented } from "./ui";
+import { Button, Card, color, isDark, s, Segmented } from "./ui";
 
 mobileAds().initialize();
 
@@ -109,7 +109,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" />
+      <StatusBar style={isDark ? "light" : "dark"} />
       <SafeAreaView style={{ flex: 1, backgroundColor: color.canvas }} edges={["top", "bottom"]}>
         <View style={{ flex: 1 }}>
           {geo === undefined ? null : tab === "trends" ? (
@@ -124,7 +124,7 @@ export default function App() {
             />
           )}
         </View>
-        <View style={{ paddingHorizontal: 20, paddingVertical: 8 }}>
+        <View style={{ paddingHorizontal: 20, paddingVertical: 4 }}>
           <Segmented dark items={[["trends", t.tabTrends], ["settings", t.tabSettings]]} value={tab} onChange={setTab} />
         </View>
         <Banner />
