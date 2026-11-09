@@ -2,11 +2,11 @@
 
 ## 해야할 일
 
-- [ ] 앱에서 인기 검색어를 못 불러오는 문제 원인 확인
 - [ ] 테스트 APK 빌드
 
 ## 완료한 일
 
+- [x] 인기 검색어 못 불러오는 문제 해결(구글 429 → D1에 마지막 결과 저장해 대신 응답)
 - [x] Worker 배포, 기존 trends Worker 삭제
 - [x] EAS 연결(eas init), Firebase 서비스 계정 키(FCM v1)를 EAS 자격증명에 등록
 - [x] Firebase 안드로이드 앱 등록, google-services.json 반영

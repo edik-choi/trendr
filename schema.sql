@@ -9,3 +9,10 @@ CREATE TABLE IF NOT EXISTS devices (
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS devices_push ON devices (notify, geo) WHERE push_token IS NOT NULL;
+
+-- 나라별 마지막으로 받은 인기 검색어. 구글이 막을 때 대신 보여줌
+CREATE TABLE IF NOT EXISTS trends_cache (
+  geo TEXT PRIMARY KEY,
+  data TEXT NOT NULL,             -- Trend[] JSON
+  fetched_at INTEGER NOT NULL     -- ms
+);
