@@ -1,7 +1,7 @@
 // 서버와 앱이 같이 씀. 구글 트렌드 "지금 뜨는 검색어" RSS 파싱과 지원 나라·언어 목록.
 
 export type News = { title: string; url: string; source: string };
-export type Trend = { title: string; traffic: string; date: number; news: News[] };
+export type Trend = { title: string; traffic: string; date: number; picture?: string; news: News[] };
 
 // 나라 선택 목록. 방문자 나라(서버가 알려줌)는 이 목록에 없어도 맨 앞에 붙음
 export const GEOS = ["US", "KR", "JP", "GB", "DE", "FR", "ES", "BR", "IN", "CA"] as const;
@@ -23,6 +23,7 @@ export function parseTrends(xml: string): Trend[] {
     title: tag(item, "title"),
     traffic: tag(item, "ht:approx_traffic"),
     date: Date.parse(tag(item, "pubDate")) || 0,
+    picture: tag(item, "ht:picture") || undefined,
     news: [...item.matchAll(/<ht:news_item>([\s\S]*?)<\/ht:news_item>/g)].map(([, n]) => ({
       title: tag(n, "ht:news_item_title"),
       url: tag(n, "ht:news_item_url"),

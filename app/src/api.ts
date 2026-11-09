@@ -42,7 +42,7 @@ async function call<T>(method: string, path: string, body?: unknown): Promise<T 
 }
 
 // home: 서버가 본 기기의 나라. 첫 화면 기본 나라
-export type TrendList = { home: string | null; geo: string; geos: string[]; trends: Trend[] };
+export type TrendList = { home: string | null; geo: string; geos: string[]; trends: Trend[]; updated?: number };
 export const getTrends = (geo?: string) => call<TrendList>("GET", `/api/trends${geo ? `?geo=${geo}` : ""}`);
 
 export type Me = { geo: string; locale: Locale; tz: string; notify: boolean; hasPushToken: boolean };

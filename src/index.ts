@@ -17,23 +17,25 @@ const sha256 = async (s: string) =>
 // 구글 트렌드 "지금 뜨는 검색어" RSS. 구글이 Cloudflare 일부 IP를 429로 막아서
 // 마지막 성공 결과를 D1에 두고 10분 안이면 그대로, 실패하면 오래된 것이라도 돌려줌
 const FRESH_MS = 10 * 60_000;
-async function fetchTrends(db: D1Database, geo: string): Promise<Trend[]> {
+async function fetchTrends(db: D1Database, geo: string): Promise<{ trends: Trend[]; updated: number }> {
   const row = await db.prepare("SELECT data, fetched_at FROM trends_cache WHERE geo = ?")
     .bind(geo).first<{ data: string; fetched_at: number }>();
-  if (row && Date.now() - row.fetched_at < FRESH_MS) return JSON.parse(row.data);
+  const cached = row && { trends: JSON.parse(row.data) as Trend[], updated: row.fetched_at };
+  if (cached && Date.now() - cached.updated < FRESH_MS) return cached;
   try {
     // 구글이 느리면 앱 쪽 타임아웃(15초)보다 먼저 끊음
     const res = await fetch(`https://trends.google.com/trending/rss?geo=${geo}`, { signal: AbortSignal.timeout(8000) });
     if (!res.ok) throw new Error(`trends ${geo} ${res.status}`);
     const trends = rankTrends(parseTrends(await res.text()));
     if (!trends.length) throw new Error(`trends ${geo} empty`);
+    const updated = Date.now();
     await db.prepare("INSERT OR REPLACE INTO trends_cache (geo, data, fetched_at) VALUES (?, ?, ?)")
-      .bind(geo, JSON.stringify(trends), Date.now()).run();
-    return trends;
+      .bind(geo, JSON.stringify(trends), updated).run();
+    return { trends, updated };
   } catch (e) {
-    if (!row) throw e;
+    if (!cached) throw e;
     console.warn(`stale trends ${geo}`, e instanceof Error ? e.message : e);
-    return JSON.parse(row.data);
+    return cached;
   }
 }
 
@@ -49,7 +51,7 @@ app.get("/api/trends", async (c) => {
   const q = c.req.query("geo")?.toUpperCase();
   const geo = isGeo(q) ? q : home ?? "US";
   try {
-    return c.json({ home, geo, geos: GEOS, trends: await fetchTrends(c.env.DB, geo) }, 200, { "cache-control": "public, max-age=300" });
+    return c.json({ home, geo, geos: GEOS, ...(await fetchTrends(c.env.DB, geo)) }, 200, { "cache-control": "public, max-age=300" });
   } catch (e) {
     const colo = (c.req.raw as { cf?: { colo?: string } }).cf?.colo;
     console.error(`api/trends failed geo=${geo} colo=${colo}`, e instanceof Error ? e.message : e);
@@ -104,7 +106,7 @@ async function notify(env: Env, now = new Date()) {
   const byGeo = new Map<string, Trend[]>();
   for (const geo of new Set(due.map((d) => d.geo))) {
     try {
-      byGeo.set(geo, await fetchTrends(env.DB, geo));
+      byGeo.set(geo, (await fetchTrends(env.DB, geo)).trends);
     } catch (e) {
       console.error(e);
     }
