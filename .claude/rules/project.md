@@ -24,7 +24,7 @@
 청약시그널과 같음: `git push -f origin main:build-preview`(테스트 APK), `main:build-production`(스토어). JS만 바뀌면 `npm run update:production`. 네이티브가 바뀌면 `version` 올리고 새 빌드.
 
 ## 출시 전 할 일 (app/app.json)
-- 앱 이름 `Trendr`(스토어 등록명은 "Trendr: Trending Searches Now" 식으로 부제 포함). 아이콘 원본 스크립트는 레포 밖(디자인 바꾸면 다시 만들기). 스토어 문구·그래픽은 `store/`
+- 앱 이름 `Trendr`(스토어 등록명은 "Trendr: Trending Searches Now" 식으로 부제 포함). 아이콘은 `python3 scripts/icons.py app/assets store`로 생성. 스토어 문구·그래픽은 `store/`
 - 패키지명 `com.trendr.app` (스토어 출시 후 변경 불가)
 - `extra.apiUrl`: 배포된 Worker 주소 (지금 https://trends.edik-choi.workers.dev 가정)
 - 애드몹 앱 ID(`plugins`의 androidAppId/iosAppId, 지금 Google 샘플)와 `extra.admob` 광고 단위 ID. 비어 있으면 테스트 광고
