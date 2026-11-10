@@ -7,25 +7,25 @@ import mobileAds from "react-native-google-mobile-ads";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Banner } from "./ads";
 import { deleteMe, getMe, saveMe, type Me } from "./api";
-import { deviceTz, locale, localeGeo, t } from "./i18n";
+import { deviceTz, locale, localeGeo, setLanguage, t } from "./i18n";
 import { registerPush } from "./push";
 import { GEO_KEY } from "./widget";
 import SettingsScreen from "./SettingsScreen";
 import TrendDetail from "./TrendDetail";
 import TrendsScreen from "./TrendsScreen";
-import type { Trend } from "../../shared/trends.ts";
-import { Button, Card, color, isDark, s, Segmented } from "./ui";
+import type { Locale, Trend } from "../../shared/trends.ts";
+import { Button, Card, color, isDark, s } from "./ui";
 
 mobileAds().initialize();
 
-type Tab = "trends" | "settings";
 const ASKED_KEY = "asked_push"; // 알림 권유 카드를 닫았는지
 
 const tryOrAlert = (f: () => Promise<void>) =>
   f().catch((e) => Alert.alert(t.errorTitle, e instanceof Error ? e.message : String(e)));
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>("trends");
+  const [settings, setSettings] = useState(false); // 설정 화면: 헤더 설정 버튼으로 열림
+  const [langKey, setLangKey] = useState(0); // 언어를 바꾸면 화면 전체를 새 문구로 다시 그림
   const [geo, setGeo] = useState<string | null | undefined>(undefined); // undefined: 저장값 읽는 중
   const [home, setHome] = useState<string | null>(null);
   const [me, setMe] = useState<Me | null | undefined>(undefined);
@@ -48,11 +48,12 @@ export default function App() {
     const sub = Linking.addEventListener("url", (e) => open(e.url));
     return () => sub.remove();
   }, []);
+  // 안드로이드 뒤로 가기: 상세 → 설정 → 목록 순으로 닫음
   useEffect(() => {
-    if (!detail) return;
-    const sub = BackHandler.addEventListener("hardwareBackPress", () => (setDetail(null), true));
+    if (!detail && !settings) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => (detail ? setDetail(null) : setSettings(false), true));
     return () => sub.remove();
-  }, [detail]);
+  }, [detail, settings]);
 
   useEffect(() => {
     SecureStore.getItemAsync(GEO_KEY).then((g) => setGeo(g), () => setGeo(null));
@@ -83,7 +84,7 @@ export default function App() {
   useEffect(() => {
     const g = response?.notification.request.content.data?.geo;
     if (response?.actionIdentifier === Notifications.DEFAULT_ACTION_IDENTIFIER) {
-      setTab("trends");
+      setSettings(false);
       setDetail(null);
       if (typeof g === "string") onGeo(g, home);
       setRefreshKey((k) => k + 1);
@@ -108,6 +109,25 @@ export default function App() {
       await saveMe(next, token);
       setMe({ ...next, hasPushToken: !!token || !!me?.hasPushToken });
     });
+
+  // 나라 하나로 목록·위젯·알림을 같이 정함: 알림이 켜져 있으면 알림 나라도 바꿈
+  const changeGeo = (g: string) => {
+    onGeo(g, home);
+    if (me?.notify) {
+      const next = { geo: g, locale, tz: deviceTz, notify: true };
+      saveMe(next, null).then(() => setMe({ ...me, ...next }), () => {});
+    }
+  };
+
+  // 언어 바꾸기: 문구 교체 → 화면 다시 그림 → 알림 문구 언어도 서버에 반영
+  const changeLanguage = (l: Locale | null) => {
+    setLanguage(l);
+    setLangKey((k) => k + 1);
+    if (me) {
+      const next = { geo: me.geo, locale, tz: deviceTz, notify: me.notify };
+      saveMe(next, null).then(() => setMe({ ...me, ...next }), () => {});
+    }
+  };
 
   const remove = () =>
     Alert.alert(t.deleteData, t.deleteConfirm, [
@@ -136,34 +156,35 @@ export default function App() {
     <SafeAreaProvider>
       <StatusBar style={isDark ? "light" : "dark"} />
       <SafeAreaView style={{ flex: 1, backgroundColor: color.canvas }} edges={["top", "bottom"]}>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1 }} key={langKey}>
           {detail ? (
             <TrendDetail
               key={`${detail.geo}:${detail.trend.title}`}
               {...detail}
               onClose={() => setDetail(null)}
-              onGeo={(g) => (setDetail(null), setTab("trends"), onGeo(g, home))}
+              onGeo={(g) => (setDetail(null), setSettings(false), onGeo(g, home))}
             />
-          ) : geo === undefined ? null : tab === "trends" ? (
+          ) : settings ? (
+            <SettingsScreen
+              me={me ?? null}
+              geo={geo ?? null}
+              home={home}
+              onGeo={changeGeo}
+              onLanguage={changeLanguage}
+              onNotify={(on) => setNotify(on, geo ?? undefined)}
+              onDelete={remove}
+              onClose={() => setSettings(false)}
+            />
+          ) : geo === undefined ? null : (
             <TrendsScreen
               geo={geo}
               onGeo={onGeo}
               refreshKey={refreshKey}
               header={askCard}
               onOpen={(g, trend, rank) => setDetail({ geo: g, trend, rank })}
-            />
-          ) : (
-            <SettingsScreen
-              me={me ?? null}
-              home={home}
-              onNotify={(on) => setNotify(on)}
-              onAlertGeo={(g) => setNotify(true, g)}
-              onDelete={remove}
+              onSettings={() => setSettings(true)}
             />
           )}
-        </View>
-        <View style={{ paddingHorizontal: 20, paddingVertical: 4, display: detail ? "none" : "flex" }}>
-          <Segmented dark items={[["trends", t.tabTrends], ["settings", t.tabSettings]]} value={tab} onChange={setTab} />
         </View>
         <Banner />
       </SafeAreaView>

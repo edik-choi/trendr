@@ -1,8 +1,16 @@
 import { getCalendars, getLocales } from "expo-localization";
+import * as SecureStore from "expo-secure-store";
 import { isLocale, LOCALE_GEO, type Locale } from "../../shared/trends.ts";
 
-// 기기 언어 중 지원하는 첫 언어, 없으면 영어
-export const locale: Locale = getLocales().map((l) => l.languageCode).find(isLocale) ?? "en";
+// 언어: 설정에서 고른 언어(SecureStore "lang"), 없으면 기기 언어 중 지원하는 첫 언어, 그것도 없으면 영어
+const LANG_KEY = "lang";
+const deviceLocale: Locale = getLocales().map((l) => l.languageCode).find(isLocale) ?? "en";
+let saved: string | null = null;
+try {
+  saved = SecureStore.getItem(LANG_KEY);
+} catch {}
+export let langChoice: Locale | null = isLocale(saved) ? saved : null; // null = 기기 설정 따르기
+export let locale: Locale = langChoice ?? deviceLocale;
 export const deviceTz: string = getCalendars()[0]?.timeZone ?? "UTC";
 // 서버가 나라를 못 알려줄 때 기본 나라
 export const localeGeo = getLocales()[0]?.regionCode ?? LOCALE_GEO[locale];
@@ -52,6 +60,10 @@ const en = {
   cardFooter: "Live trending searches · Trendr",
   shareTop: "Share top 5",
   widgetOpen: "Open Trendr to see what's trending",
+  country: "Country",
+  countryDesc: "Used for the trending list, widget and alerts.",
+  language: "Language",
+  languageAuto: "Device language",
 };
 type Strings = typeof en;
 
@@ -102,6 +114,10 @@ const STRINGS: Record<Locale, Strings> = {
     cardFooter: "실시간 인기 검색어 · Trendr",
     shareTop: "TOP 5 공유",
     widgetOpen: "눌러서 인기 검색어 보기",
+    country: "나라",
+    countryDesc: "인기 검색어 목록, 위젯, 알림에 쓰여요.",
+    language: "언어",
+    languageAuto: "기기 언어",
   },
   ja: {
     tabTrends: "急上昇ワード",
@@ -148,6 +164,10 @@ const STRINGS: Record<Locale, Strings> = {
     cardFooter: "リアルタイム急上昇ワード · Trendr",
     shareTop: "TOP 5を共有",
     widgetOpen: "タップして急上昇ワードを見る",
+    country: "国",
+    countryDesc: "急上昇ワード、ウィジェット、通知に使われます。",
+    language: "言語",
+    languageAuto: "端末の言語",
   },
   de: {
     tabTrends: "Trends",
@@ -194,6 +214,10 @@ const STRINGS: Record<Locale, Strings> = {
     cardFooter: "Trends in Echtzeit · Trendr",
     shareTop: "Top 5 teilen",
     widgetOpen: "Tippen, um die Trends zu sehen",
+    country: "Land",
+    countryDesc: "Gilt für die Trendliste, das Widget und Benachrichtigungen.",
+    language: "Sprache",
+    languageAuto: "Gerätesprache",
   },
   fr: {
     tabTrends: "Tendances",
@@ -240,6 +264,10 @@ const STRINGS: Record<Locale, Strings> = {
     cardFooter: "Tendances en temps réel · Trendr",
     shareTop: "Partager le top 5",
     widgetOpen: "Touchez pour voir les tendances",
+    country: "Pays",
+    countryDesc: "Utilisé pour la liste des tendances, le widget et les alertes.",
+    language: "Langue",
+    languageAuto: "Langue de l’appareil",
   },
   es: {
     tabTrends: "Tendencias",
@@ -286,6 +314,10 @@ const STRINGS: Record<Locale, Strings> = {
     cardFooter: "Tendencias en tiempo real · Trendr",
     shareTop: "Compartir top 5",
     widgetOpen: "Toca para ver las tendencias",
+    country: "País",
+    countryDesc: "Se usa para la lista de tendencias, el widget y las alertas.",
+    language: "Idioma",
+    languageAuto: "Idioma del dispositivo",
   },
   pt: {
     tabTrends: "Em alta",
@@ -332,10 +364,32 @@ const STRINGS: Record<Locale, Strings> = {
     cardFooter: "Tendências em tempo real · Trendr",
     shareTop: "Compartilhar top 5",
     widgetOpen: "Toque para ver as tendências",
+    country: "País",
+    countryDesc: "Usado na lista de tendências, no widget e nos alertas.",
+    language: "Idioma",
+    languageAuto: "Idioma do aparelho",
   },
 };
 
-export const t = STRINGS[locale];
+// 언어를 바꾸면 같은 객체의 내용을 바꿔 끼움(가져다 쓰는 곳은 그대로). 화면은 App이 다시 그림
+export const t: Strings = { ...STRINGS[locale] };
+
+// 설정 화면 언어 목록: 각 언어로 쓴 이름
+export const LANGUAGE_NAMES: Record<Locale, string> = {
+  en: "English", ko: "한국어", ja: "日本語", de: "Deutsch", fr: "Français", es: "Español", pt: "Português",
+};
+
+export function setLanguage(l: Locale | null) {
+  langChoice = l;
+  locale = l ?? deviceLocale;
+  Object.assign(t, STRINGS[locale]);
+  try {
+    names = new Intl.DisplayNames([locale], { type: "region" });
+  } catch {
+    names = null;
+  }
+  (l ? SecureStore.setItemAsync(LANG_KEY, l) : SecureStore.deleteItemAsync(LANG_KEY)).catch(() => {});
+}
 export const fmt = (s: string, n: string | number) => s.replace("{n}", String(n));
 
 // 나라 이름. Hermes에 Intl.DisplayNames가 없을 수 있어 실패하면 코드 그대로

@@ -10,8 +10,8 @@
   - `/privacy` 스토어 등록용 개인정보처리방침(`src/privacy.ts`, 한·영).
   - Cron `0 * * * *`: ① `collect` — GEOS 10개 나라 목록을 `trend_history`에 기록(`src/history.ts`) ② `notify` — 기기 시간대 기준 지금이 `PUSH_HOURS`(`src/digest.ts`)인 기기에 나라별 상위 3개 푸시(Expo Push, ①에서 받은 목록 재사용). DeviceNotRegistered면 토큰 비움.
 - `shared/trends.ts`: RSS 파싱, 순위, 나라·언어 목록. 서버와 앱이 같이 씀.
-- `app/` Expo(SDK 58) 앱. 탭 2개: 인기 검색어(나라 칩, 당겨서 새로고침, 줄 → 전면 광고 후 상세 화면 `TrendDetail.tsx`(탭 위에 열림, 안드로이드 뒤로 가기), 뉴스 줄 → 전면 광고 후 기사) / 설정(알림, 알림 나라, 개인정보처리방침, 내 정보 삭제). 하단 배너. 첫 화면에 알림 권유 카드.
-  - 7개 언어(en, ko, ja, de, fr, es, pt): `app/src/i18n.ts`. 기기 언어 중 지원하는 첫 언어, 없으면 영어.
+- `app/` Expo(SDK 58) 앱. 탭 없음. 홈 = 인기 검색어(헤더: 공유·설정(⚙) 버튼, 지금 나라 표시(누르면 설정), 당겨서 새로고침, 줄 → 전면 광고 후 상세 화면 `TrendDetail.tsx`, 뉴스 줄 → 전면 광고 후 기사). 설정 `SettingsScreen.tsx`: 나라(목록·위젯·알림 공통, 알림 켜져 있으면 서버 알림 나라도 바꿈), 언어(기기 언어 또는 7개 중 선택), 알림, 개인정보처리방침, 내 정보 삭제. 상세·설정은 홈 위에 열리고 안드로이드 뒤로 가기로 닫힘. 하단 배너. 첫 화면에 알림 권유 카드.
+  - 7개 언어(en, ko, ja, de, fr, es, pt): `app/src/i18n.ts`. 설정에서 고른 언어(SecureStore `lang`) → 기기 언어 중 지원하는 첫 언어 → 영어. `setLanguage`가 `t` 내용을 바꾸고 App이 `langKey`로 화면을 다시 그림.
   - 디자인 토큰·공용 컴포넌트는 `app/src/ui.tsx`(청약시그널과 같은 모노크롬).
   - 공유 카드 `app/src/share.tsx`: 화면 밖에 카드를 그려 1080×1350 PNG로 캡처(react-native-view-shot) → 시스템 공유창(expo-sharing). 상세 화면 "공유" = 검색어 카드, 홈 "공유" = TOP 5 카드. 항상 어두운 카드. 실패 시 텍스트 공유.
   - 홈 화면 위젯(안드로이드) `app/src/widget.tsx`(react-native-android-widget, 이름 `Top3`): 마지막으로 본 나라 상위 3개. 30분마다 + 앱이 목록을 받을 때 갱신. 줄 → `trendr://trend?geo=&q=` 딥링크로 상세 화면(App.tsx에서 처리). 핸들러는 `app/index.ts`에 등록. iOS 위젯은 미구현(Swift 필요).

@@ -1,13 +1,13 @@
 import * as WebBrowser from "expo-web-browser";
-import { useCallback, useEffect, useRef, useState, type ComponentRef, type ReactNode } from "react";
-import { FlatList, Image, type LayoutChangeEvent, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
 import type { Trend } from "../../shared/trends.ts";
 import { useInterstitialBefore } from "./ads";
 import { getTrends, type TrendList } from "./api";
 import { ago, countryName, fmt, t } from "./i18n";
 import { useShareCard } from "./share";
 import { updateWidget } from "./widget";
-import { Button, Chip, color, Empty, radius, s, Skeleton } from "./ui";
+import { Button, color, Empty, radius, s, Skeleton } from "./ui";
 
 type Props = {
   geo: string | null; // null: 서버가 기기 나라로 정함
@@ -15,14 +15,14 @@ type Props = {
   refreshKey: number;
   header?: ReactNode; // 알림 권유 카드
   onOpen: (geo: string, trend: Trend, rank: number) => void; // 상세 화면 열기
+  onSettings: () => void; // 설정 화면 열기(나라·언어는 거기서)
 };
 
-export default function TrendsScreen({ geo, onGeo, refreshKey, header, onOpen }: Props) {
+export default function TrendsScreen({ geo, onGeo, refreshKey, header, onOpen, onSettings }: Props) {
   const [data, setData] = useState<TrendList | null>(null);
   const [error, setError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const withAd = useInterstitialBefore();
-  const chips = useRef<ComponentRef<typeof ScrollView>>(null);
   const card = useShareCard();
 
   const load = useCallback(async () => {
@@ -46,8 +46,6 @@ export default function TrendsScreen({ geo, onGeo, refreshKey, header, onOpen }:
     setRefreshing(false);
   };
 
-  // 기기 나라가 목록에 없어도 맨 앞에
-  const geos = data ? [...new Set([...(data.home ? [data.home] : []), ...data.geos])] : [];
 
   if (!data && error) {
     return (
@@ -74,27 +72,22 @@ export default function TrendsScreen({ geo, onGeo, refreshKey, header, onOpen }:
         <>
           <View style={st.head}>
             <Text style={[s.h1, { marginBottom: 0 }]}>Trendr</Text>
-            <View style={{ flexDirection: "row", alignItems: "baseline", gap: 12 }}>
-              {!!data.updated && !switching && <Text style={s.sub}>{fmt(t.updated, ago(data.updated))}</Text>}
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
               {!switching && data.trends.length > 0 && (
                 <Pressable onPress={() => card.shareTop(data.geo, data.trends)} accessibilityRole="button" accessibilityLabel={t.shareTop} hitSlop={10}>
                   <Text style={[s.body, { fontWeight: "600" }]}>{t.share}</Text>
                 </Pressable>
               )}
+              <Pressable onPress={onSettings} accessibilityRole="button" accessibilityLabel={t.tabSettings} hitSlop={10}>
+                <Text style={st.gear}>⚙︎</Text>
+              </Pressable>
             </View>
           </View>
-          <ScrollView ref={chips} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingBottom: 16 }}>
-            {geos.map((g) => {
-              const on = g === (geo ?? data.geo);
-              // 처음 그릴 때 선택된 나라가 화면 밖이면 보이게 스크롤
-              const show = on ? (e: LayoutChangeEvent) => chips.current?.scrollTo({ x: Math.max(0, e.nativeEvent.layout.x - 20), animated: false }) : undefined;
-              return (
-                <View key={g} onLayout={show}>
-                  <Chip label={countryName(g)} on={on} onPress={() => onGeo(g, data.home)} />
-                </View>
-              );
-            })}
-          </ScrollView>
+          {/* 지금 나라: 누르면 설정(나라 바꾸기) */}
+          <Pressable onPress={onSettings} accessibilityRole="button" accessibilityLabel={t.country} style={st.country} hitSlop={6}>
+            <Text style={[s.body, { fontWeight: "600" }]}>{countryName(geo ?? data.geo)} ▾</Text>
+            {!!data.updated && !switching && <Text style={s.sub}>{fmt(t.updated, ago(data.updated))}</Text>}
+          </Pressable>
           {header}
           {error && <Text style={s.error}>{t.error}</Text>}
         </>
@@ -149,7 +142,9 @@ function Row({ trend, rank, onOpen, onNews }: { trend: Trend; rank: number; onOp
 }
 
 const st = StyleSheet.create({
-  head: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", marginBottom: 16 },
+  head: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 6 },
+  gear: { fontSize: 22, lineHeight: 26, color: color.ink },
+  country: { flexDirection: "row", alignItems: "baseline", gap: 10, marginBottom: 16, alignSelf: "flex-start" },
   card: { backgroundColor: color.soft, borderRadius: radius.md, overflow: "hidden", marginBottom: 12 },
   picture: { width: "100%", aspectRatio: 16 / 9, backgroundColor: color.hairline },
   cardBody: { flexDirection: "row", gap: 14, padding: 16 },
